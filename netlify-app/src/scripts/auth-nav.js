@@ -9,7 +9,14 @@ if (url && key) {
   });
 
   async function updateNav() {
-    const { data: { user } } = await supabase.auth.getUser();
+    let user = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data?.user ?? null;
+    } catch (e) {
+      if (e?.name !== 'AbortError' && !e?.message?.includes('aborted')) throw e;
+      return;
+    }
     const loginEl = document.getElementById('nav-login');
     const registerEl = document.getElementById('nav-register');
     const adminEl = document.getElementById('nav-admin');
@@ -31,5 +38,7 @@ if (url && key) {
   }
 
   updateNav();
-  supabase.auth.onAuthStateChange(() => updateNav());
+  supabase.auth.onAuthStateChange(() => {
+    updateNav().catch(() => {});
+  });
 }

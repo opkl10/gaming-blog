@@ -60,7 +60,10 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
           btn.textContent = 'מעביר...';
           window.location.href = '/admin';
         } catch (err) {
-          errEl.textContent = (err && err.message) ? err.message : 'שגיאה בהתחברות. נסה שוב או בדוק את הקונסול (F12).';
+          const isAbort = err && (err.name === 'AbortError' || (err.message && err.message.includes('aborted')));
+          errEl.textContent = isAbort
+            ? 'הבקשה בוטלה. נסה שוב (או נסה בחלון פרטי / דפדפן אחר).'
+            : ((err && err.message) ? err.message : 'שגיאה בהתחברות. נסה שוב או בדוק את הקונסול (F12).');
           errEl.style.display = 'block';
           btn.disabled = false;
           btn.textContent = 'התחבר';
