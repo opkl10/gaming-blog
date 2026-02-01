@@ -22,20 +22,24 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
   </section>
   <script>
     import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth', detectSessionInUrl: true }
+    });
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const errEl = document.getElementById('auth-error');
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       errEl.style.display = 'none';
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         errEl.textContent = error.message || 'שגיאה בהתחברות';
         errEl.style.display = 'block';
         return;
       }
-      window.location.href = '/admin';
+      // להמתין שהסשן יישמר ב־localStorage לפני מעבר עמוד
+      await supabase.auth.getSession();
+      setTimeout(() => { window.location.href = '/admin'; }, 100);
     });
   </script>
 </BaseLayout>

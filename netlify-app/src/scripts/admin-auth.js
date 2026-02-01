@@ -7,7 +7,9 @@ if (!url || !key) {
   throw new Error('Missing Supabase env');
 }
 
-const supabase = createClient(url, key);
+const supabase = createClient(url, key, {
+  auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth', detectSessionInUrl: true }
+});
 
 export async function requireAdmin(callback) {
   const { data: { user } } = await supabase.auth.getUser();

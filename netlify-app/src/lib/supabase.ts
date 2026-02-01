@@ -7,4 +7,6 @@ if (!url || !anonKey) {
   console.warn('Supabase URL or anon key missing. Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY.');
 }
 
-export const supabase = createClient(url || '', anonKey || '');
+export const supabase = createClient(url || '', anonKey || '', {
+  auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth', detectSessionInUrl: true }
+});

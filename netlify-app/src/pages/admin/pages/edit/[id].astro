@@ -34,7 +34,7 @@ const { id } = Astro.params;
   <script define:vars={{ id }}>
     import { requireAdmin } from '@/scripts/admin-auth.js';
     import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth' } });
     requireAdmin(async () => {
       const { data: page } = await supabase.from('pages').select('*').eq('id', id).single();
       if (!page) { document.getElementById('admin-content').innerHTML = '<p>עמוד לא נמצא.</p>'; return; }

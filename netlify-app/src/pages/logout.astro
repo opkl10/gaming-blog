@@ -7,7 +7,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
   </div>
   <script>
     import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth' } });
     supabase.auth.signOut().then(() => { window.location.href = '/'; });
   </script>
 </BaseLayout>

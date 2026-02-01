@@ -4,7 +4,9 @@ const url = import.meta.env.PUBLIC_SUPABASE_URL;
 const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
 if (url && key) {
-  const supabase = createClient(url, key);
+  const supabase = createClient(url, key, {
+    auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth', detectSessionInUrl: true }
+  });
 
   async function updateNav() {
     const { data: { user } } = await supabase.auth.getUser();

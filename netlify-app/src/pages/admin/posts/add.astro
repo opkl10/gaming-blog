@@ -40,7 +40,7 @@ import AdminLayout from '@/layouts/AdminLayout.astro';
   <script>
     import { requireAdmin } from '@/scripts/admin-auth.js';
     import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth' } });
     requireAdmin(async ({ user }) => {
       document.getElementById('post-form').addEventListener('submit', async (e) => {
         e.preventDefault();

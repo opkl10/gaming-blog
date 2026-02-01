@@ -27,7 +27,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
   </section>
   <script>
     import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth' } });
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const errEl = document.getElementById('auth-error');
