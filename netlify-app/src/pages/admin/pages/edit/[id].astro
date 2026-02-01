@@ -3,7 +3,7 @@ import AdminLayout from '@/layouts/AdminLayout.astro';
 const { id } = Astro.params;
 ---
 <AdminLayout title="עריכת עמוד">
-  <div id="admin-content">
+  <div class="admin-page-content">
     <h1>עריכת עמוד</h1>
     <div id="form-error" class="alert alert-error" style="display:none"></div>
     <form id="page-form" class="editor-form">
@@ -33,17 +33,18 @@ const { id } = Astro.params;
   </div>
   <script define:vars={{ id }}>
     import { requireAdmin } from '@/scripts/admin-auth.js';
-    import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth' } });
-    requireAdmin(async () => {
+    function init() {
+      requireAdmin(async ({ supabase }) => {
       const { data: page } = await supabase.from('pages').select('*').eq('id', id).single();
-      if (!page) { document.getElementById('admin-content').innerHTML = '<p>עמוד לא נמצא.</p>'; return; }
+      if (!page) { const wrap = document.querySelector('.admin-page-content'); if (wrap) wrap.outerHTML = '<p>עמוד לא נמצא.</p>'; return; }
       document.getElementById('title').value = page.title;
       document.getElementById('slug').value = page.slug;
       document.getElementById('content').value = page.content || '';
       document.getElementById('meta_description').value = page.meta_description || '';
       document.querySelector('[name="is_published"]').checked = page.is_published;
-      document.getElementById('page-form').addEventListener('submit', async (e) => {
+      const formEl = document.getElementById('page-form');
+      if (!formEl) return;
+      formEl.addEventListener('submit', async (e) => {
         e.preventDefault();
         const errEl = document.getElementById('form-error');
         errEl.style.display = 'none';
@@ -59,5 +60,7 @@ const { id } = Astro.params;
         window.location.href = '/admin/pages';
       });
     });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   </script>
 </AdminLayout>

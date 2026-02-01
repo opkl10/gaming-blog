@@ -2,8 +2,9 @@
 import AdminLayout from '@/layouts/AdminLayout.astro';
 const { id } = Astro.params;
 ---
+<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css" />
 <AdminLayout title="עריכת פוסט">
-  <div id="admin-content">
+  <div class="admin-page-content post-editor-page">
     <h1>עריכת פוסט</h1>
     <div id="form-error" class="alert alert-error" style="display:none"></div>
     <form id="post-form" class="editor-form">
@@ -17,12 +18,13 @@ const { id } = Astro.params;
         <input type="text" id="slug" name="slug" />
       </div>
       <div class="form-group">
-        <label for="excerpt">תקציר</label>
-        <textarea id="excerpt" name="excerpt" rows="3"></textarea>
+        <label for="excerpt">כותרת משנה / תקציר</label>
+        <textarea id="excerpt" name="excerpt" rows="2"></textarea>
       </div>
       <div class="form-group">
-        <label for="content">תוכן</label>
-        <textarea id="content" name="content" rows="14"></textarea>
+        <label>תוכן הפוסט</label>
+        <div id="editor-container" class="rich-editor-wrap"></div>
+        <input type="hidden" name="content" id="content" />
       </div>
       <div class="form-group">
         <label for="featured_image">כתובת תמונת כותרת</label>
@@ -35,44 +37,72 @@ const { id } = Astro.params;
       <div class="form-group">
         <label><input type="checkbox" name="is_published" value="1" /> מפורסם</label>
       </div>
-      <button type="submit" class="btn btn-primary">שמור שינויים</button>
-      <a href="/admin/posts" class="btn btn-secondary">ביטול</a>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">שמור שינויים</button>
+        <a href="/admin/posts" class="btn btn-secondary">ביטול</a>
+      </div>
     </form>
   </div>
+  <script is:inline src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
   <script define:vars={{ id }}>
     import { requireAdmin } from '@/scripts/admin-auth.js';
-    import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth' } });
-    requireAdmin(async () => {
+    function init() {
+      requireAdmin(async ({ supabase }) => {
       const { data: post } = await supabase.from('posts').select('*').eq('id', id).single();
-      if (!post) { document.getElementById('admin-content').innerHTML = '<p>פוסט לא נמצא.</p>'; return; }
+      if (!post) { const wrap = document.querySelector('.admin-page-content'); if (wrap) wrap.outerHTML = '<p>פוסט לא נמצא.</p>'; return; }
       document.getElementById('title').value = post.title;
       document.getElementById('slug').value = post.slug;
       document.getElementById('excerpt').value = post.excerpt || '';
-      document.getElementById('content').value = post.content || '';
       document.getElementById('featured_image').value = post.featured_image || '';
       document.getElementById('meta_description').value = post.meta_description || '';
       document.querySelector('[name="is_published"]').checked = post.is_published;
-      document.getElementById('post-form').addEventListener('submit', async (e) => {
+      const contentInput = document.getElementById('content');
+      if (contentInput) contentInput.value = post.content || '';
+      const editorEl = document.getElementById('editor-container');
+      let quill = null;
+      if (editorEl && typeof Quill !== 'undefined') {
+        quill = new Quill(editorEl, {
+          theme: 'snow',
+          placeholder: 'כתוב כאן את תוכן הפוסט...',
+          modules: {
+            toolbar: [
+              [{ header: [1, 2, 3, false] }],
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ list: 'ordered' }, { list: 'bullet' }],
+              ['link', 'image', 'blockquote', 'code-block'],
+              [{ color: [] }, { background: [] }],
+              ['clean']
+            ]
+          }
+        });
+        quill.root.innerHTML = post.content || '';
+      }
+      const formEl = document.getElementById('post-form');
+      if (!formEl) return;
+      formEl.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (contentInput && quill) contentInput.value = quill.root.innerHTML;
         const errEl = document.getElementById('form-error');
-        errEl.style.display = 'none';
+        if (errEl) errEl.style.display = 'none';
         const is_published = document.querySelector('[name="is_published"]').checked;
         const published_at = is_published ? (post.published_at || new Date().toISOString()) : null;
+        const content = (contentInput && contentInput.value) || (quill ? quill.root.innerHTML : '');
         const { error } = await supabase.from('posts').update({
           title: document.getElementById('title').value.trim(),
           slug: document.getElementById('slug').value.trim(),
           excerpt: document.getElementById('excerpt').value.trim(),
-          content: document.getElementById('content').value,
+          content,
           featured_image: document.getElementById('featured_image').value.trim() || null,
           meta_description: document.getElementById('meta_description').value.trim(),
           is_published,
           published_at,
           updated_at: new Date().toISOString()
         }).eq('id', id);
-        if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+        if (error) { if (errEl) { errEl.textContent = error.message; errEl.style.display = 'block'; } return; }
         window.location.href = '/admin/posts';
       });
     });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   </script>
 </AdminLayout>

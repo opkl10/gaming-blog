@@ -2,7 +2,7 @@
 import AdminLayout from '@/layouts/AdminLayout.astro';
 ---
 <AdminLayout title="עמוד חדש">
-  <div id="admin-content">
+  <div class="admin-page-content">
     <h1>עמוד חדש</h1>
     <div id="form-error" class="alert alert-error" style="display:none"></div>
     <form id="page-form" class="editor-form">
@@ -31,10 +31,11 @@ import AdminLayout from '@/layouts/AdminLayout.astro';
   </div>
   <script>
     import { requireAdmin } from '@/scripts/admin-auth.js';
-    import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth' } });
-    requireAdmin(async ({ user }) => {
-      document.getElementById('page-form').addEventListener('submit', async (e) => {
+    function init() {
+      requireAdmin(async ({ user, supabase }) => {
+      const formEl = document.getElementById('page-form');
+      if (!formEl) return;
+      formEl.addEventListener('submit', async (e) => {
         e.preventDefault();
         const errEl = document.getElementById('form-error');
         errEl.style.display = 'none';
@@ -55,5 +56,7 @@ import AdminLayout from '@/layouts/AdminLayout.astro';
         window.location.href = '/admin/pages';
       });
     });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   </script>
 </AdminLayout>

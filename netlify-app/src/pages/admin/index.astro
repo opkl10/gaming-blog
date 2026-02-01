@@ -4,7 +4,8 @@ import AdminLayout from '@/layouts/AdminLayout.astro';
 <AdminLayout title="דשבורד">
   <script>
     import { requireAdmin } from '@/scripts/admin-auth.js';
-    requireAdmin(async ({ supabase }) => {
+    function init() {
+      requireAdmin(async ({ supabase }) => {
       const { count: postsCount } = await supabase.from('posts').select('*', { count: 'exact', head: true });
       const { count: publishedCount } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('is_published', true);
       const { count: pagesCount } = await supabase.from('pages').select('*', { count: 'exact', head: true });
@@ -44,7 +45,11 @@ import AdminLayout from '@/layouts/AdminLayout.astro';
           ${(!recentPosts || recentPosts.length === 0) ? '<p>אין פוסטים. <a href="/admin/posts/add">צור פוסט ראשון</a></p>' : ''}
         </section>
       `;
-      document.getElementById('admin-content').innerHTML = html;
+      const el = document.getElementById('admin-content');
+      const path = typeof location !== 'undefined' ? location.pathname : '';
+      if (el && (path === '/admin' || path === '/admin/')) el.innerHTML = html;
     });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   </script>
 </AdminLayout>

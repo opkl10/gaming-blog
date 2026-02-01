@@ -32,8 +32,11 @@ body {
   padding: 1rem 0;
 }
 .site-header .container { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-.logo { font-size: 1.35rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+.logo { font-size: 1.35rem; font-weight: 700; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
 .logo:hover { color: var(--accent-hover); }
+.logo-img { max-height: 2.5rem; width: auto; display: block; }
+.site-ad { padding: 1rem 0; border-top: 1px solid var(--border); }
+.ad-slot { min-height: 50px; }
 .main-nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
 .main-nav a { color: var(--text-muted); text-decoration: none; }
 .main-nav a:hover { color: var(--accent); }
@@ -81,6 +84,7 @@ body {
 }
 .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
 .form-group textarea { min-height: 100px; resize: vertical; }
+.form-hint { display: block; margin-top: 0.35rem; font-size: 0.85rem; color: var(--text-muted); }
 
 .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: var(--radius); font: inherit; cursor: pointer; border: none; text-decoration: none; font-weight: 500; }
 .btn-primary { background: var(--accent); color: var(--bg); }
@@ -99,8 +103,14 @@ body {
 .site-footer p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
 
 /* Admin */
+.admin-loading { display: none; }
 .admin-body .site-header { background: #1a1a24; }
 .admin-main { padding: 2rem 0; }
+.form-actions { margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.rich-editor-wrap { min-height: 280px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.rich-editor-wrap .ql-toolbar { border: none; border-bottom: 1px solid var(--border); background: #16161e; }
+.rich-editor-wrap .ql-container { border: none; font-size: 1rem; }
+.rich-editor-wrap .ql-editor { min-height: 240px; }
 .data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
 .data-table th, .data-table td { padding: 0.75rem 1rem; text-align: right; border-bottom: 1px solid var(--border); }
 .data-table th { background: #16161e; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; }

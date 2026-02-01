@@ -1,0 +1,92 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+---
+<AdminLayout title="הגדרות אתר">
+  <div class="admin-page-content">
+    <h1>הגדרות אתר</h1>
+    <div id="form-error" class="alert alert-error" style="display:none"></div>
+    <div id="form-success" class="alert alert-success" style="display:none"></div>
+    <form id="settings-form" class="editor-form">
+      <div class="form-group">
+        <label for="site_name">שם האתר *</label>
+        <input type="text" id="site_name" name="site_name" required placeholder="בלוג משחקי מחשב" />
+      </div>
+      <div class="form-group">
+        <label for="tagline">סיסמה / תת-כותרת</label>
+        <input type="text" id="tagline" name="tagline" placeholder="ביקורות וחדשות גיימינג" />
+      </div>
+      <div class="form-group">
+        <label for="logo_url">כתובת לוגו (תמונה)</label>
+        <input type="url" id="logo_url" name="logo_url" placeholder="https://..." />
+        <small class="form-hint">השאר ריק כדי להציג את שם האתר כטקסט</small>
+      </div>
+      <div class="form-group">
+        <label for="accent_color">צבע הדגש (Accent)</label>
+        <input type="text" id="accent_color" name="accent_color" placeholder="#00d4aa" />
+      </div>
+      <div class="form-group">
+        <label for="accent_hover">צבע הדגש ב־hover</label>
+        <input type="text" id="accent_hover" name="accent_hover" placeholder="#00f0c0" />
+      </div>
+      <div class="form-group">
+        <label for="ad_code">קוד מודעה / תמונה (HTML)</label>
+        <textarea id="ad_code" name="ad_code" rows="4" placeholder='<a href="..."><img src="..." alt="מודעה" /></a> או קוד מודעה (למשל Google AdSense)'></textarea>
+        <small class="form-hint">מוצג בתחתית האתר מעל הפוטר. HTML חופשי.</small>
+      </div>
+      <div class="form-group">
+        <label for="footer_text">טקסט פוטר</label>
+        <input type="text" id="footer_text" name="footer_text" placeholder="© 2025 שם האתר. כל הזכויות שמורות." />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">שמור הגדרות</button>
+      </div>
+    </form>
+  </div>
+  <script>
+    import { requireAdmin } from '@/scripts/admin-auth.js';
+    function init() {
+      requireAdmin(async ({ supabase }) => {
+      const formEl = document.getElementById('settings-form');
+      if (!formEl) return;
+      const { data: row } = await supabase.from('site_settings').select('*').limit(1).single();
+      if (row) {
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        set('site_name', row.site_name);
+        set('tagline', row.tagline);
+        set('logo_url', row.logo_url);
+        set('accent_color', row.accent_color);
+        set('accent_hover', row.accent_hover);
+        set('ad_code', row.ad_code);
+        set('footer_text', row.footer_text);
+      }
+      formEl.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errEl = document.getElementById('form-error');
+        const successEl = document.getElementById('form-success');
+        if (errEl) errEl.style.display = 'none';
+        if (successEl) successEl.style.display = 'none';
+        const payload = {
+          site_name: document.getElementById('site_name').value.trim(),
+          tagline: document.getElementById('tagline').value.trim(),
+          logo_url: document.getElementById('logo_url').value.trim() || null,
+          accent_color: document.getElementById('accent_color').value.trim() || '#00d4aa',
+          accent_hover: document.getElementById('accent_hover').value.trim() || '#00f0c0',
+          ad_code: document.getElementById('ad_code').value.trim() || null,
+          footer_text: document.getElementById('footer_text').value.trim() || null,
+          updated_at: new Date().toISOString()
+        };
+        const { data: existing } = await supabase.from('site_settings').select('id').limit(1).single();
+        const { error } = existing
+          ? await supabase.from('site_settings').update(payload).eq('id', existing.id)
+          : await supabase.from('site_settings').insert(payload);
+        if (error) {
+          if (errEl) { errEl.textContent = error.message; errEl.style.display = 'block'; }
+          return;
+        }
+        if (successEl) { successEl.textContent = 'ההגדרות נשמרו.'; successEl.style.display = 'block'; }
+      });
+    });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  </script>
+</AdminLayout>

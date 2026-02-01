@@ -25,14 +25,15 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
     const url = import.meta.env.PUBLIC_SUPABASE_URL;
     const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     const errEl = document.getElementById('auth-error');
+    const loginForm = document.getElementById('login-form');
     if (!url || !key) {
-      errEl.textContent = 'חסרים הגדרות Supabase. בדוק משתני סביבה ב-Netlify.';
-      errEl.style.display = 'block';
-    } else {
+      if (errEl) { errEl.textContent = 'חסרים הגדרות Supabase. בדוק משתני סביבה ב-Netlify.'; errEl.style.display = 'block'; }
+    } else if (loginForm) {
       const supabase = createClient(url, key, {
         auth: { persistSession: true, storageKey: 'sb-gaming-blog-auth', detectSessionInUrl: true }
       });
-      document.getElementById('login-form').addEventListener('submit', async (e) => {
+      const loginFormEl = document.getElementById('login-form');
+      if (loginFormEl) loginFormEl.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('login-btn');
         btn.disabled = true;

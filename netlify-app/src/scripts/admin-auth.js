@@ -2,8 +2,10 @@ import { createClient } from '@supabase/supabase-js';
 
 const url = import.meta.env.PUBLIC_SUPABASE_URL;
 const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+const adminContent = () => document.getElementById('admin-content');
 if (!url || !key) {
-  document.getElementById('admin-content').innerHTML = '<p>חסרים משתני סביבה של Supabase.</p>';
+  const el = adminContent();
+  if (el) el.innerHTML = '<p>חסרים משתני סביבה של Supabase.</p>';
   throw new Error('Missing Supabase env');
 }
 
@@ -20,9 +22,17 @@ export async function requireAdmin(callback) {
   const { data: profile } = await supabase.from('profiles').select('role').eq('user_id', user.id).single();
   const role = profile?.role || 'author';
   if (role !== 'admin' && role !== 'editor') {
-    document.getElementById('admin-content').innerHTML = '<p>אין לך הרשאה לגשת לדף זה.</p>';
+    const el = adminContent();
+    if (el) {
+      el.innerHTML = '<p>אין לך הרשאה לגשת לדף זה.</p>';
+      const slot = el.nextElementSibling;
+      if (slot) slot.style.display = 'none';
+    }
     return;
   }
-  document.getElementById('admin-user').textContent = user.email || '';
+  const ac = adminContent();
+  if (ac && ac.nextElementSibling) ac.nextElementSibling.style.display = '';
+  const userEl = document.getElementById('admin-user');
+  if (userEl) userEl.textContent = user.email || '';
   if (callback) await callback({ user, profile, supabase });
 }

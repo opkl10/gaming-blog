@@ -21,14 +21,16 @@ const { title = 'פאנל ניהול' } = Astro.props;
         <a href="/admin">דשבורד</a>
         <a href="/admin/pages">עמודים</a>
         <a href="/admin/posts">פוסטים</a>
+        <a href="/admin/settings">הגדרות</a>
         <span id="admin-user"></span>
         <a href="/logout">התנתק</a>
       </nav>
     </div>
   </header>
   <main class="admin-main">
-    <div class="container" id="admin-content">
-      <p>טוען...</p>
+    <div class="container">
+      <div id="admin-content"><p class="admin-loading">טוען...</p></div>
+      <slot />
     </div>
   </main>
   <script>

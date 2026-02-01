@@ -48,6 +48,23 @@ CREATE INDEX IF NOT EXISTS idx_posts_slug ON public.posts(slug);
 CREATE INDEX IF NOT EXISTS idx_posts_published ON public.posts(is_published);
 CREATE INDEX IF NOT EXISTS idx_posts_published_at ON public.posts(published_at DESC);
 
+-- הגדרות אתר (שורה אחת)
+CREATE TABLE IF NOT EXISTS public.site_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_name TEXT NOT NULL DEFAULT 'בלוג משחקי מחשב',
+  tagline TEXT DEFAULT '',
+  logo_url TEXT,
+  accent_color TEXT DEFAULT '#00d4aa',
+  accent_hover TEXT DEFAULT '#00f0c0',
+  ad_code TEXT,
+  footer_text TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- שורת ברירת מחדל (אם הטבלה ריקה)
+INSERT INTO public.site_settings (site_name)
+SELECT 'בלוג משחקי מחשב' WHERE NOT EXISTS (SELECT 1 FROM public.site_settings LIMIT 1);
+
 -- טריגר: יצירת פרופיל אוטומטי אחרי הרשמה
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -72,15 +89,22 @@ CREATE TRIGGER on_auth_user_created
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 
--- profiles: קריאה לעצמך, עדכון לעצמך
+-- מחיקת policies קיימים (כדי שאפשר להריץ את הסקריפט שוב בלי שגיאה)
+DROP POLICY IF EXISTS "Users can read own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Admins can read all profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Public read published pages" ON public.pages;
+DROP POLICY IF EXISTS "Admins and editors manage pages" ON public.pages;
+DROP POLICY IF EXISTS "Public read published posts" ON public.posts;
+DROP POLICY IF EXISTS "Admins and editors manage posts" ON public.posts;
+DROP POLICY IF EXISTS "Authors can insert own posts" ON public.posts;
+DROP POLICY IF EXISTS "Authors can update own posts" ON public.posts;
+
+-- profiles: קריאה לעצמך, עדכון לעצמך (בלי policy שמפנה לאותה טבלה – מונע 500)
 CREATE POLICY "Users can read own profile" ON public.profiles FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = user_id);
-
--- profiles: אדמין יכול לקרוא הכל (לצורך הצגת מחבר)
-CREATE POLICY "Admins can read all profiles" ON public.profiles FOR SELECT USING (
-  EXISTS (SELECT 1 FROM public.profiles WHERE user_id = auth.uid() AND role IN ('admin', 'editor'))
-);
 
 -- pages: כולם קוראים עמודים מפורסמים
 CREATE POLICY "Public read published pages" ON public.pages FOR SELECT USING (is_published = true);
@@ -95,6 +119,14 @@ CREATE POLICY "Admins and editors manage posts" ON public.posts FOR ALL USING (
 );
 CREATE POLICY "Authors can insert own posts" ON public.posts FOR INSERT WITH CHECK (auth.uid() = author_id);
 CREATE POLICY "Authors can update own posts" ON public.posts FOR UPDATE USING (auth.uid() = author_id);
+
+-- site_settings: כולם קוראים, רק אדמין/עורך מעדכנים
+DROP POLICY IF EXISTS "Public read site settings" ON public.site_settings;
+DROP POLICY IF EXISTS "Admins manage site settings" ON public.site_settings;
+CREATE POLICY "Public read site settings" ON public.site_settings FOR SELECT USING (true);
+CREATE POLICY "Admins manage site settings" ON public.site_settings FOR ALL USING (
+  EXISTS (SELECT 1 FROM public.profiles WHERE user_id = auth.uid() AND role IN ('admin', 'editor'))
+);
 
 -- אפשרות: להפוך את המשתמש הראשון לאדמין (אם הטריגר לא מספיק)
 -- UPDATE public.profiles SET role = 'admin' WHERE user_id = 'YOUR-USER-UUID' LIMIT 1;

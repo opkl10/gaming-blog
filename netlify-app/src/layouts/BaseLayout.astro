@@ -1,25 +1,52 @@
 ---
+import { supabase } from '@/lib/supabase';
+
 interface Props {
   title?: string;
   description?: string;
 }
 
 const { title = 'בלוג משחקי מחשב', description = 'בלוג משחקי מחשב' } = Astro.props;
-const siteName = 'בלוג משחקי מחשב';
+
+let siteName = 'בלוג משחקי מחשב';
+let tagline = '';
+let logoUrl: string | null = null;
+let accentColor = '#00d4aa';
+let accentHover = '#00f0c0';
+let adCode = '';
+let footerText = '';
+try {
+  const { data: row } = await supabase.from('site_settings').select('*').limit(1).single();
+  if (row) {
+    siteName = row.site_name || siteName;
+    tagline = row.tagline || '';
+    logoUrl = row.logo_url || null;
+    accentColor = row.accent_color || accentColor;
+    accentHover = row.accent_hover || accentHover;
+    adCode = row.ad_code || '';
+    footerText = row.footer_text || '';
+  }
+} catch (_) {}
+const pageTitle = title !== siteName ? `${title} | ${siteName}` : title;
+const footerDisplay = footerText || `© ${new Date().getFullYear()} ${siteName}. כל הזכויות שמורות.`;
+const footerIsHtml = !!footerText;
 ---
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title !== siteName ? `${title} | ${siteName}` : title}</title>
+  <title>{pageTitle}</title>
   <meta name="description" content={description} />
   <link rel="stylesheet" href="/styles.css" />
+  <style is:inline>{`:root { --accent: ${accentColor}; --accent-hover: ${accentHover}; }`}</style>
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <a href="/" class="logo">{siteName}</a>
+      <a href="/" class="logo">
+        {logoUrl ? <img src={logoUrl} alt={siteName} class="logo-img" /> : siteName}
+      </a>
       <nav class="main-nav">
         <a href="/">ראשי</a>
         <a href="/posts">פוסטים</a>
@@ -33,9 +60,14 @@ const siteName = 'בלוג משחקי מחשב';
   <main class="main-content">
     <slot />
   </main>
+  {adCode && (
+    <aside class="site-ad" aria-label="פרסומת">
+      <div class="container ad-slot" set:html={adCode} />
+    </aside>
+  )}
   <footer class="site-footer">
     <div class="container">
-      <p>© {new Date().getFullYear()} {siteName}. כל הזכויות שמורות.</p>
+      {footerIsHtml ? <p set:html={footerDisplay} /> : <p>{footerDisplay}</p>}
     </div>
   </footer>
   <script>
