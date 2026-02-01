@@ -1,6 +1,6 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { supabase } from '../../lib/supabase';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { supabase } from '@/lib/supabase';
 
 const page = Number(Astro.url.searchParams.get('p') || 1);
 const perPage = 9;

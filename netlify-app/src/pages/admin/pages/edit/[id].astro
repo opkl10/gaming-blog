@@ -1,5 +1,5 @@
 ---
-import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import AdminLayout from '@/layouts/AdminLayout.astro';
 const { id } = Astro.params;
 ---
 <AdminLayout title="עריכת עמוד">
@@ -32,7 +32,7 @@ const { id } = Astro.params;
     </form>
   </div>
   <script define:vars={{ id }}>
-    import { requireAdmin } from '../../../../scripts/admin-auth.js';
+    import { requireAdmin } from '@/scripts/admin-auth.js';
     import { createClient } from '@supabase/supabase-js';
     const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
     requireAdmin(async () => {

@@ -1,9 +1,9 @@
 ---
-import AdminLayout from '../../../layouts/AdminLayout.astro';
+import AdminLayout from '@/layouts/AdminLayout.astro';
 ---
 <AdminLayout title="עמודים">
   <script>
-    import { requireAdmin } from '../../../scripts/admin-auth.js';
+    import { requireAdmin } from '@/scripts/admin-auth.js';
     requireAdmin(async ({ supabase }) => {
       const { data: pages } = await supabase.from('pages').select('*').order('updated_at', { ascending: false });
       const escapeHtml = (s) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };

@@ -1,9 +1,9 @@
 ---
-import AdminLayout from '../../layouts/AdminLayout.astro';
+import AdminLayout from '@/layouts/AdminLayout.astro';
 ---
 <AdminLayout title="דשבורד">
   <script>
-    import { requireAdmin } from '../../scripts/admin-auth.js';
+    import { requireAdmin } from '@/scripts/admin-auth.js';
     requireAdmin(async ({ supabase }) => {
       const { count: postsCount } = await supabase.from('posts').select('*', { count: 'exact', head: true });
       const { count: publishedCount } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('is_published', true);
