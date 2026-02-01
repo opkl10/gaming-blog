@@ -6,12 +6,18 @@ const page = Number(Astro.url.searchParams.get('p') || 1);
 const perPage = 9;
 const from = (page - 1) * perPage;
 
-const { data: posts, count } = await supabase
-  .from('posts')
-  .select('id, title, slug, excerpt, content, featured_image, published_at', { count: 'exact' })
-  .eq('is_published', true)
-  .order('published_at', { ascending: false })
-  .range(from, from + perPage - 1);
+let posts = [];
+let count = 0;
+try {
+  const res = await supabase
+    .from('posts')
+    .select('id, title, slug, excerpt, content, featured_image, published_at', { count: 'exact' })
+    .eq('is_published', true)
+    .order('published_at', { ascending: false })
+    .range(from, from + perPage - 1);
+  posts = res.data || [];
+  count = res.count ?? 0;
+} catch (_) {}
 
 const totalPages = count ? Math.ceil(count / perPage) : 0;
 ---

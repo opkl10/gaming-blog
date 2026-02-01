@@ -61,6 +61,11 @@ astro.on('close', (code, signal) => {
     hypothesisId: 'H2,H4,H5',
   });
   // #endregion
+  // הדפסה ללוג Netlify כדי לראות את השגיאה האמיתית
+  if (code !== 0) {
+    console.error('\n--- stderr ---\n' + stderr);
+    console.log('\n--- stdout (last 2k) ---\n' + stdout.slice(-2000));
+  }
   process.exit(code ?? 1);
 });
 
