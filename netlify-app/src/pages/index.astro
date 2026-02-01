@@ -2,17 +2,24 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { supabase } from '../lib/supabase';
 
-const { data: posts } = await supabase
-  .from('posts')
-  .select('id, title, slug, excerpt, content, featured_image, published_at')
-  .eq('is_published', true)
-  .order('published_at', { ascending: false })
-  .limit(6);
-
-const { data: pages } = await supabase
-  .from('pages')
-  .select('title, slug')
-  .eq('is_published', true');
+let posts = [];
+let pages = [];
+try {
+  const res = await supabase
+    .from('posts')
+    .select('id, title, slug, excerpt, content, featured_image, published_at')
+    .eq('is_published', true)
+    .order('published_at', { ascending: false })
+    .limit(6);
+  posts = res.data || [];
+  const pagesRes = await supabase
+    .from('pages')
+    .select('title, slug')
+    .eq('is_published', true);
+  pages = pagesRes.data || [];
+} catch (_) {
+  // build continues with empty data if Supabase fails
+}
 ---
 <BaseLayout title="ראשי" description="בלוג משחקי מחשב">
   <section class="hero">
@@ -26,7 +33,7 @@ const { data: pages } = await supabase
     <div class="container">
       <h2>פוסטים אחרונים</h2>
       <div class="posts-grid">
-        {(posts || []).map((post) => (
+        {posts.map((post) => (
           <article class="post-card">
             {post.featured_image && (
               <a href={`/post/${post.slug}`} class="post-image">
@@ -44,17 +51,17 @@ const { data: pages } = await supabase
           </article>
         ))}
       </div>
-      {(!posts || posts.length === 0) && <p class="no-posts">עדיין אין פוסטים.</p>}
+      {posts.length === 0 && <p class="no-posts">עדיין אין פוסטים.</p>}
       <p class="all-posts-link"><a href="/posts">כל הפוסטים</a></p>
     </div>
   </section>
 
-  {(pages || []).length > 0 && (
+  {pages.length > 0 && (
     <section class="pages-list">
       <div class="container">
         <h2>עמודים</h2>
         <ul>
-          {(pages || []).map((p) => (
+          {pages.map((p) => (
             <li><a href={`/page/${p.slug}`}>{p.title}</a></li>
           ))}
         </ul>
