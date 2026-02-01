@@ -1,0 +1,26 @@
+# Gaming Blog - הגנה על קבצים רגישים
+# מונע גישה ישירה ל-config, includes, database
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    # חסימת גישה לתיקיות רגישות
+    RewriteRule ^includes/ - [F,L]
+    RewriteRule ^database/ - [F,L]
+    # הפניה משורש האתר ל-public
+    RewriteRule ^$ public/ [L]
+</IfModule>
+
+# חסימת גישה לקבצים ולתיקיות רגישות
+<Files "config.php">
+    Require all denied
+</Files>
+<Files "config.example.php">
+    Require all denied
+</Files>
+
+# אם השרת מאפשר – חסום תיקיות (תלוי בהגדרות האחסון)
+# <IfModule mod_authz_core.c>
+#     RedirectMatch 403 ^/includes/
+#     RedirectMatch 403 ^/database/
+# </IfModule>

@@ -1,0 +1,14 @@
+# Gaming Blog - Netlify
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# משתני הסביבה מוגדרים ב-Netlify Dashboard (או כאן לא ל commit):
+# PUBLIC_SUPABASE_URL = "https://xxxx.supabase.co"
+# PUBLIC_SUPABASE_ANON_KEY = "eyJ..."

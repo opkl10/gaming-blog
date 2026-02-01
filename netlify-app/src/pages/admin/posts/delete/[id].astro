@@ -1,0 +1,16 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+const { id } = Astro.params;
+---
+<AdminLayout title="מוחק">
+  <script define:vars={{ id }}>
+    import { requireAdmin } from '../../../../scripts/admin-auth.js';
+    import { createClient } from '@supabase/supabase-js';
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    requireAdmin(async () => {
+      await supabase.from('posts').delete().eq('id', id);
+      window.location.href = '/admin/posts';
+    });
+  </script>
+  <div id="admin-content"><p>מוחק...</p></div>
+</AdminLayout>

@@ -1,0 +1,5 @@
+# אפשר גישה ל־index ברירת מחדל
+DirectoryIndex index.php
+
+# הגנה בסיסית – אין רשימת תיקיות
+Options -Indexes

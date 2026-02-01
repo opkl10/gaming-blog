@@ -1,0 +1,35 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+<AdminLayout title="עמודים">
+  <script>
+    import { requireAdmin } from '../../../scripts/admin-auth.js';
+    requireAdmin(async ({ supabase }) => {
+      const { data: pages } = await supabase.from('pages').select('*').order('updated_at', { ascending: false });
+      const escapeHtml = (s) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+      const html = `
+        <h1>עמודים</h1>
+        <p><a href="/admin/pages/add" class="btn btn-primary">עמוד חדש</a></p>
+        <table class="data-table">
+          <thead><tr><th>כותרת</th><th>קישור</th><th>סטטוס</th><th>עודכן</th><th></th></tr></thead>
+          <tbody>
+            ${(pages || []).map(p => `
+              <tr>
+                <td>${escapeHtml(p.title)}</td>
+                <td><a href="/page/${escapeHtml(p.slug)}" target="_blank">/page/${escapeHtml(p.slug)}</a></td>
+                <td>${p.is_published ? 'מפורסם' : 'טיוטה'}</td>
+                <td>${p.updated_at ? new Date(p.updated_at).toLocaleString('he-IL') : '-'}</td>
+                <td>
+                  <a href="/admin/pages/edit/${p.id}">ערוך</a>
+                  <a href="/admin/pages/delete/${p.id}" class="link-danger" onclick="return confirm('למחוק?');">מחק</a>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ${(!pages || pages.length === 0) ? '<p>אין עמודים. <a href="/admin/pages/add">צור עמוד ראשון</a></p>' : ''}
+      `;
+      document.getElementById('admin-content').innerHTML = html;
+    });
+  </script>
+</AdminLayout>

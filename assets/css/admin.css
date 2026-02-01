@@ -1,0 +1,156 @@
+/* Admin Panel */
+.admin-body {
+  background: #12121a;
+}
+
+.admin-header {
+  background: #1a1a24;
+  border-bottom: 1px solid #2a2a35;
+  padding: 0.75rem 0;
+}
+
+.admin-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-logo {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #00d4aa;
+  text-decoration: none;
+}
+
+.admin-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.admin-nav a {
+  color: #888;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.admin-nav a:hover {
+  color: #00d4aa;
+}
+
+.admin-nav .user-name {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.admin-main {
+  padding: 2rem 0 3rem;
+  min-height: 60vh;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.dashboard-cards .card {
+  background: #1a1a24;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.dashboard-cards .card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #888;
+}
+
+.dashboard-cards .card .big {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.dashboard-cards .card p {
+  margin: 0 0 1rem;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.recent-list {
+  margin-top: 2rem;
+}
+
+.recent-list h2 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1a1a24;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #2a2a35;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.75rem 1rem;
+  text-align: right;
+  border-bottom: 1px solid #2a2a35;
+}
+
+.data-table th {
+  background: #16161e;
+  color: #888;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table a {
+  color: #00d4aa;
+  text-decoration: none;
+  margin-left: 0.75rem;
+}
+
+.data-table a:hover {
+  text-decoration: underline;
+}
+
+.data-table .link-danger {
+  color: #e74c3c;
+}
+
+.editor-form {
+  max-width: 720px;
+  margin-top: 1rem;
+}
+
+.editor-form .form-group label input[type="checkbox"] {
+  margin-left: 0.5rem;
+}
+
+.admin-footer {
+  padding: 1rem 0;
+  border-top: 1px solid #2a2a35;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.admin-footer .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}

@@ -1,0 +1,59 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+<AdminLayout title="עמוד חדש">
+  <div id="admin-content">
+    <h1>עמוד חדש</h1>
+    <div id="form-error" class="alert alert-error" style="display:none"></div>
+    <form id="page-form" class="editor-form">
+      <div class="form-group">
+        <label for="title">כותרת *</label>
+        <input type="text" id="title" name="title" required />
+      </div>
+      <div class="form-group">
+        <label for="slug">קישור (slug)</label>
+        <input type="text" id="slug" name="slug" placeholder="ינוצר אוטומטית" />
+      </div>
+      <div class="form-group">
+        <label for="content">תוכן</label>
+        <textarea id="content" name="content" rows="12"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="meta_description">תיאור SEO</label>
+        <input type="text" id="meta_description" name="meta_description" />
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" name="is_published" value="1" checked /> מפורסם</label>
+      </div>
+      <button type="submit" class="btn btn-primary">שמור עמוד</button>
+      <a href="/admin/pages" class="btn btn-secondary">ביטול</a>
+    </form>
+  </div>
+  <script>
+    import { requireAdmin } from '../../../scripts/admin-auth.js';
+    import { createClient } from '@supabase/supabase-js';
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    requireAdmin(async ({ user }) => {
+      document.getElementById('page-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errEl = document.getElementById('form-error');
+        errEl.style.display = 'none';
+        let title = document.getElementById('title').value.trim();
+        let slug = document.getElementById('slug').value.trim() || title.replace(/\s+/g, '-').replace(/[^\p{L}\p{N}-]/gu, '').toLowerCase();
+        const content = document.getElementById('content').value;
+        const meta_description = document.getElementById('meta_description').value.trim();
+        const is_published = document.querySelector('[name="is_published"]').checked;
+        const { error } = await supabase.from('pages').insert({
+          title,
+          slug,
+          content,
+          meta_description,
+          is_published,
+          created_by: user.id
+        });
+        if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+        window.location.href = '/admin/pages';
+      });
+    });
+  </script>
+</AdminLayout>

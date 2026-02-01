@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { supabase } from '../lib/supabase';
+
+const { data: posts } = await supabase
+  .from('posts')
+  .select('id, title, slug, excerpt, content, featured_image, published_at')
+  .eq('is_published', true)
+  .order('published_at', { ascending: false })
+  .limit(6);
+
+const { data: pages } = await supabase
+  .from('pages')
+  .select('title, slug')
+  .eq('is_published', true');
+---
+<BaseLayout title="ראשי" description="בלוג משחקי מחשב">
+  <section class="hero">
+    <div class="container">
+      <h1>ברוכים הבאים לבלוג משחקי המחשב</h1>
+      <p>ביקורות, טיפים וחדשות מהעולם של משחקי המחשב</p>
+    </div>
+  </section>
+
+  <section class="recent-posts">
+    <div class="container">
+      <h2>פוסטים אחרונים</h2>
+      <div class="posts-grid">
+        {(posts || []).map((post) => (
+          <article class="post-card">
+            {post.featured_image && (
+              <a href={`/post/${post.slug}`} class="post-image">
+                <img src={post.featured_image} alt={post.title} />
+              </a>
+            )}
+            <div class="post-body">
+              <h3><a href={`/post/${post.slug}`}>{post.title}</a></h3>
+              <p class="post-meta">{post.published_at ? new Date(post.published_at).toLocaleString('he-IL') : ''}</p>
+              <p class="post-excerpt">
+                {(post.excerpt || (post.content || '').replace(/<[^>]*>/g, '').slice(0, 120))}...
+              </p>
+              <a href={`/post/${post.slug}`} class="read-more">קרא עוד</a>
+            </div>
+          </article>
+        ))}
+      </div>
+      {(!posts || posts.length === 0) && <p class="no-posts">עדיין אין פוסטים.</p>}
+      <p class="all-posts-link"><a href="/posts">כל הפוסטים</a></p>
+    </div>
+  </section>
+
+  {(pages || []).length > 0 && (
+    <section class="pages-list">
+      <div class="container">
+        <h2>עמודים</h2>
+        <ul>
+          {(pages || []).map((p) => (
+            <li><a href={`/page/${p.slug}`}>{p.title}</a></li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+</BaseLayout>

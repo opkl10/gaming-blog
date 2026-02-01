@@ -1,0 +1,46 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = 'בלוג משחקי מחשב', description = 'בלוג משחקי מחשב' } = Astro.props;
+const siteName = 'בלוג משחקי מחשב';
+---
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title !== siteName ? `${title} | ${siteName}` : title}</title>
+  <meta name="description" content={description} />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">{siteName}</a>
+      <nav class="main-nav">
+        <a href="/">ראשי</a>
+        <a href="/posts">פוסטים</a>
+        <a href="/login" id="nav-login">התחברות</a>
+        <a href="/register" id="nav-register">הרשמה</a>
+        <a href="/admin" id="nav-admin" style="display:none">פאנל ניהול</a>
+        <a href="#" id="nav-logout" style="display:none">התנתק</a>
+      </nav>
+    </div>
+  </header>
+  <main class="main-content">
+    <slot />
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <p>© {new Date().getFullYear()} {siteName}. כל הזכויות שמורות.</p>
+    </div>
+  </footer>
+  <script>
+    import '../scripts/auth-nav.js';
+  </script>
+  <slot name="scripts" />
+</body>
+</html>

@@ -1,0 +1,35 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+<AdminLayout title="פוסטים">
+  <script>
+    import { requireAdmin } from '../../../scripts/admin-auth.js';
+    requireAdmin(async ({ supabase }) => {
+      const { data: posts } = await supabase.from('posts').select('*').order('published_at', { ascending: false });
+      const escapeHtml = (s) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+      const html = `
+        <h1>פוסטים</h1>
+        <p><a href="/admin/posts/add" class="btn btn-primary">פוסט חדש</a></p>
+        <table class="data-table">
+          <thead><tr><th>כותרת</th><th>סטטוס</th><th>תאריך פרסום</th><th></th></tr></thead>
+          <tbody>
+            ${(posts || []).map(p => `
+              <tr>
+                <td>${escapeHtml(p.title)}</td>
+                <td>${p.is_published ? 'מפורסם' : 'טיוטה'}</td>
+                <td>${(p.published_at || p.created_at) ? new Date(p.published_at || p.created_at).toLocaleString('he-IL') : '-'}</td>
+                <td>
+                  ${p.is_published ? `<a href="/post/${escapeHtml(p.slug)}" target="_blank">צפה</a>` : ''}
+                  <a href="/admin/posts/edit/${p.id}">ערוך</a>
+                  <a href="/admin/posts/delete/${p.id}" class="link-danger" onclick="return confirm('למחוק?');">מחק</a>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ${(!posts || posts.length === 0) ? '<p>אין פוסטים. <a href="/admin/posts/add">צור פוסט ראשון</a></p>' : ''}
+      `;
+      document.getElementById('admin-content').innerHTML = html;
+    });
+  </script>
+</AdminLayout>

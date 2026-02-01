@@ -1,0 +1,50 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+<AdminLayout title="דשבורד">
+  <script>
+    import { requireAdmin } from '../../scripts/admin-auth.js';
+    requireAdmin(async ({ supabase }) => {
+      const { count: postsCount } = await supabase.from('posts').select('*', { count: 'exact', head: true });
+      const { count: publishedCount } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('is_published', true);
+      const { count: pagesCount } = await supabase.from('pages').select('*', { count: 'exact', head: true });
+      const { data: recentPosts } = await supabase.from('posts').select('id, title, is_published, published_at, created_at').order('created_at', { ascending: false }).limit(5);
+
+      const escapeHtml = (s) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+      const html = `
+        <h1>דשבורד</h1>
+        <div class="dashboard-cards">
+          <div class="card">
+            <h3>פוסטים</h3>
+            <p class="big">${publishedCount || 0} מפורסמים</p>
+            <p>${(postsCount || 0) - (publishedCount || 0)} טיוטות</p>
+            <a href="/admin/posts" class="btn btn-primary">נהל פוסטים</a>
+          </div>
+          <div class="card">
+            <h3>עמודים</h3>
+            <p class="big">${pagesCount || 0}</p>
+            <a href="/admin/pages" class="btn btn-primary">נהל עמודים</a>
+          </div>
+        </div>
+        <section class="recent-list">
+          <h2>פוסטים אחרונים</h2>
+          <table class="data-table">
+            <thead><tr><th>כותרת</th><th>סטטוס</th><th>תאריך</th><th></th></tr></thead>
+            <tbody>
+              ${(recentPosts || []).map(p => `
+                <tr>
+                  <td>${escapeHtml(p.title)}</td>
+                  <td>${p.is_published ? 'מפורסם' : 'טיוטה'}</td>
+                  <td>${(p.published_at || p.created_at) ? new Date(p.published_at || p.created_at).toLocaleString('he-IL') : '-'}</td>
+                  <td><a href="/admin/posts/edit/${p.id}">ערוך</a></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          ${(!recentPosts || recentPosts.length === 0) ? '<p>אין פוסטים. <a href="/admin/posts/add">צור פוסט ראשון</a></p>' : ''}
+        </section>
+      `;
+      document.getElementById('admin-content').innerHTML = html;
+    });
+  </script>
+</AdminLayout>

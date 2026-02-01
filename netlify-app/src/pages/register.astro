@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="הרשמה" description="הרשמה לבלוג">
+  <section class="auth-form">
+    <div class="container narrow">
+      <h1>הרשמה</h1>
+      <div id="auth-error" class="alert alert-error" style="display:none"></div>
+      <div id="auth-success" class="alert alert-success" style="display:none"></div>
+      <form id="register-form">
+        <div class="form-group">
+          <label for="email">אימייל</label>
+          <input type="email" id="email" name="email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">סיסמה (לפחות 6 תווים)</label>
+          <input type="password" id="password" name="password" required minlength="6" />
+        </div>
+        <div class="form-group">
+          <label for="username">שם משתמש (אופציונלי)</label>
+          <input type="text" id="username" name="username" />
+        </div>
+        <button type="submit" class="btn btn-primary">הירשם</button>
+      </form>
+      <p class="auth-link"><a href="/login">כבר יש לך חשבון? התחבר</a></p>
+    </div>
+  </section>
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('auth-error');
+      const successEl = document.getElementById('auth-success');
+      errEl.style.display = 'none';
+      successEl.style.display = 'none';
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const username = document.getElementById('username').value;
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username: username || email.split('@')[0] } }
+      });
+      if (error) {
+        errEl.textContent = error.message || 'שגיאה בהרשמה';
+        errEl.style.display = 'block';
+        return;
+      }
+      successEl.innerHTML = 'נרשמת בהצלחה. <a href="/login">התחבר עכשיו</a>';
+      successEl.style.display = 'block';
+      document.getElementById('register-form').reset();
+    });
+  </script>
+</BaseLayout>

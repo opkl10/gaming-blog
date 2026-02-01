@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="מתנתק">
+  <div class="container">
+    <p>מתנתק...</p>
+  </div>
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+    const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+    supabase.auth.signOut().then(() => { window.location.href = '/'; });
+  </script>
+</BaseLayout>

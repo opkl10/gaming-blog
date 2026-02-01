@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { supabase } from '../lib/supabase';
+
+const page = Number(Astro.url.searchParams.get('p') || 1);
+const perPage = 9;
+const from = (page - 1) * perPage;
+
+const { data: posts, count } = await supabase
+  .from('posts')
+  .select('id, title, slug, excerpt, content, featured_image, published_at', { count: 'exact' })
+  .eq('is_published', true)
+  .order('published_at', { ascending: false })
+  .range(from, from + perPage - 1);
+
+const totalPages = count ? Math.ceil(count / perPage) : 0;
+---
+<BaseLayout title="פוסטים" description="כל הפוסטים">
+  <section class="posts-archive">
+    <div class="container">
+      <h1>כל הפוסטים</h1>
+      <div class="posts-grid">
+        {(posts || []).map((post) => (
+          <article class="post-card">
+            {post.featured_image && (
+              <a href={`/post/${post.slug}`} class="post-image">
+                <img src={post.featured_image} alt={post.title} />
+              </a>
+            )}
+            <div class="post-body">
+              <h3><a href={`/post/${post.slug}`}>{post.title}</a></h3>
+              <p class="post-meta">{post.published_at ? new Date(post.published_at).toLocaleString('he-IL') : ''}</p>
+              <p class="post-excerpt">
+                {(post.excerpt || (post.content || '').replace(/<[^>]*>/g, '').slice(0, 120))}...
+              </p>
+              <a href={`/post/${post.slug}`} class="read-more">קרא עוד</a>
+            </div>
+          </article>
+        ))}
+      </div>
+      {(!posts || posts.length === 0) && <p class="no-posts">אין פוסטים עדיין.</p>}
+      {totalPages > 1 && (
+        <nav class="pagination">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <a href={`/posts?p=${p}`} class={p === page ? 'current' : ''}>{p}</a>
+          ))}
+        </nav>
+      )}
+    </div>
+  </section>
+</BaseLayout>
